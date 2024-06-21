@@ -107,7 +107,7 @@ jobs:
             if flag or video_flag:
                 print(response)
                 issue.add_to_labels("toxic")
-                if video_flag
+                if video_flag:
                     warn = "不適切な画像です。アカウントBANの危険性があります。"
                 else:
                     warn = "不適切な投稿です。アカウントBANの危険性があります。"
