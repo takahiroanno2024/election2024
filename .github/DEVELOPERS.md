@@ -12,7 +12,6 @@
     - [ローカルでのビルド方法](#ローカルでのビルド方法)
     - [docs内markdown作成時の注意](#docs内markdown作成時の注意)
     - [デプロイ/Publish](#デプロイpublish)
-    - [その他 ](#その他-)
 
 ## リポジトリの目的
 
@@ -60,10 +59,4 @@ MkDocsのバグにより、リストのインデントはスペース4つでな�
 
 ## デプロイ/Publish
 
-<!-- todo: GitHub Pagesでのデプロイ方法を記載する　https://github.com/takahiroanno2024/githubpagestest/issues/46 -->
-
-## その他 <!-- 公開時削除 -->
-
-公開時（公示日を想定）はリポジトリごと引っ越して過去の開発履歴を消してお披露目します。
-
-公開時の注意: overrides/main.html 内の `noindex`は、正式公開後に必ず削除してください！
+<!-- todo: GitHub Pagesでのデプロイ方法を記載する -->
