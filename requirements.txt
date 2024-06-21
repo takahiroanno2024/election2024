@@ -1,0 +1,4 @@
+mkdocs==1.6.0
+mkdocs-get-deps==0.2.0
+mkdocs-material==9.5.26
+mkdocs-material-extensions==1.3.1

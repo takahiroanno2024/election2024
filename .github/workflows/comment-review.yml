@@ -1,0 +1,102 @@
+name: Hide comment
+
+on: issue_comment
+permissions:
+  issues: write
+  contents: read
+jobs:
+  review_issue:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install openai
+        pip install PyGithub
+        pip install qdrant-client
+        pip install regex
+
+    - name: Review comment with LLM
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        QD_API_KEY: ${{ secrets.QD_API_KEY }}
+        QD_URL: ${{ secrets.QD_URL }}
+      run: |
+        python <<EOF
+        import github
+        from github import Github
+        import os
+        import openai
+        import regex as re
+
+        token = os.getenv("GITHUB_TOKEN")
+        qd_api = os.getenv("QD_API_KEY")
+        qd_url = os.getenv("QD_URL")
+        g = Github(token)
+        repo = g.get_repo("${{ github.repository }}")
+        issue = repo.get_issue(${{ github.event.issue.number }})
+        issue_content = f"{issue.title}\n{issue.body}"
+        openai_client = openai.Client()
+        embedding_model = "text-embedding-3-small"
+        collection_name = "issue_collection"
+
+
+        def validate_image(text):
+            model_name = "gpt-4o"
+            prompt = "この画像が暴力的、もしくは性的な画像の場合trueと返してください。"
+            image_url = re.search(r"!\[[^\s]+\]\((https://[^\s]+)\)", text)
+            if image_url and len(image_url) > 1:
+                image_url = image_url[1]
+            else:
+                return False
+            try:
+                response = openai_client.chat.completions.create(
+                  model=model_name,
+                  messages=[
+                    {
+                      "role": "user",
+                      "content": [
+                        {"type": "text", "text": prompt},
+                        {
+                          "type": "image_url",
+                          "image_url": {
+                            "url": image_url
+                          },
+                        },
+                      ],
+                    }
+                  ],
+                  max_tokens=1200,
+                )
+            except:
+                return True
+            v = response.choices[0].message.content.lower()
+            if "true" in v:
+                return True
+            else:
+                return False
+
+        def judge_violation(text):
+            response = openai_client.moderations.create(input=text)
+            print(response)
+            flag = response.results[0].flagged
+            video_flag = validate_image(text)
+            if flag or video_flag:
+                return True
+            return flag
+        comments = issue.get_comments()
+
+        for comment in comments:
+            if judge_violation(comment.body):
+                comment.edit("このコメントは非表示にされました")
+        EOF

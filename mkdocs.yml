@@ -1,0 +1,16 @@
+site_name: 安野たかひろ：政策リポジトリ
+theme:
+  name: material
+  custom_dir: overrides
+  language: ja
+nav:
+  - Home: 'index.md'
+  - 'マニフェスト':
+    - '1. 経済': 'manifest/economy.md'
+    - '2. 防災・医療': 'manifest/care.md'
+    - '3. 教育・子育て': 'manifest/education.md'
+    - '4. 行政': 'manifest/administration.md'
+    - '5. 民主主義': 'manifest/democracy.md'
+  - '貢献したいあなたへ': 'contribution.md'
+  - 'issueマニュアル': 'manual_issue.md'
+  - 'Pull Requestマニュアル': 'manual_pull_request.md'
