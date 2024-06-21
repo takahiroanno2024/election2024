@@ -67,7 +67,7 @@
 安野たかひろのマニフェストに対して、具体的に変更提案します。
 
 - 変更提案はこちら
-    - [GitHub](https://github.com/takahiroanno/election2024)
+    - [GitHub Pull requests](https://github.com/takahiroanno/election2024/pulls)
 - 変更提案の仕方は[こちら](/docs/manual_pull_request.md)
 
 ### 変更提案の反映について
