@@ -3,8 +3,22 @@
 
 ## 概要
 
-安野たかひろの政策オープンソースです。
+[安野たかひろ](https://takahiroanno.com)の政策オープンソースです。
 マニフェストに対して、誰でも自由に変更提案をすることができます。
+
+### 安野たかひろについて
+
+安野(あんの)たかひろ は、AIエンジニア、起業家、SF作家の経歴を持つ東京都知事候補者です。テクノロジーで誰も取り残さない東京を目指して本マニフェストを作成しています。
+
+
+安野たかひろ についての最新情報は下記よりご確認ください。
+
+- [公式サイト](https://takahiroanno.com)
+- 公式Xアカウント
+    - [本人](https://x.com/takahiroanno)
+    - [事務所](https://x.com/annotakahiro24)
+- [公式YouTube](https://www.youtube.com/@shumicode)
+- [公式Instagram](https://www.instagram.com/annotakahiro2024)
 
 ### マニフェスト
 
