@@ -12,5 +12,5 @@ nav:
     - '4. 行政': 'manifest/administration.md'
     - '5. 民主主義': 'manifest/democracy.md'
   - '貢献したいあなたへ': 'contribution.md'
-  - 'issueマニュアル': 'manual_issue.md'
+  - 'Issueマニュアル': 'manual_issue.md'
   - 'Pull Requestマニュアル': 'manual_pull_request.md'
