@@ -31,8 +31,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         QD_API_KEY: ${{ secrets.QD_API_KEY }}
         QD_URL: ${{ secrets.QD_URL }}
+      shell: python
       run: |
-        python <<EOF
         import github
         from github import Github
         import os
@@ -99,4 +99,3 @@ jobs:
         for comment in comments:
             if judge_violation(comment.body):
                 comment.edit("このコメントは非表示にされました")
-        EOF
