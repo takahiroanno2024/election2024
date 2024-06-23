@@ -16,7 +16,7 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: 製作
+      label: 政策
       description: できる限りの記入をお願いします
     validations:
       required: true
