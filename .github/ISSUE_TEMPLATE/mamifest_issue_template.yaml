@@ -40,3 +40,8 @@ body:
       label: 調べたこと（裏付けとなる事実・ファクト）
     validations:
       required: true
+  - type: textarea
+    attributes:
+      label: 自由記述欄
+    validations:
+      required: false
