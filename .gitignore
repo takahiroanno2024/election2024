@@ -1,3 +1,6 @@
 gvenv
 .venv/*
 site
+
+.SourceSageAssets
+issue_creator.log
