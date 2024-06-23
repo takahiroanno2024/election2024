@@ -24,17 +24,17 @@ body:
     attributes:
       label: 必要だと思ったきっかけ
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: なぜ必要か
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: この Issue で議論したいこと
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: 調べたこと（裏付けとなる事実・ファクト）
