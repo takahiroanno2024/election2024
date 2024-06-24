@@ -25,21 +25,24 @@ jobs:
           const issueBody = context.payload.issue.body;
           const labelsToAdd = [];
 
-          const policyVisionSectionMatch = issueBody.match(/## 政策ビジョン([\s\S]*?)## 政策/);
+          const policyVisionSectionMatch = issueBody.match(/## 政策ビジョン([\s\S]*)## 政策/);
           const policyVisionSection = policyVisionSectionMatch ? policyVisionSectionMatch[1] : '';
 
           const categories = [
-            { regex: /- \[.*[xX✓✔].*\] 経済/i, label: '経済' },
-            { regex: /- \[.*[xX✓✔].*\] 医療・防災/i, label: '医療・防災' },
-            { regex: /- \[.*[xX✓✔].*\] 教育・子育て/i, label: '教育・子育て' },
-            { regex: /- \[.*[xX✓✔].*\] 行政/i, label: '行政' },
-            { regex: /- \[.*[xX✓✔].*\] 民主主義/i, label: '民主主義' },
+            { regex: /^経済$/, label: '経済' },
+            { regex: /^医療・防災$/, label: '医療・防災' },
+            { regex: /^教育・子育て$/, label: '教育・子育て' },
+            { regex: /^行政$/, label: '行政' },
+            { regex: /^民主主義$/, label: '民主主義' },
           ];
 
-          categories.forEach(category => {
-            if (category.regex.test(policyVisionSection)) {
-              labelsToAdd.push(category.label);
-            }
+          policyVisionSection.split('\n').forEach(line => {
+            categories.forEach(category => {
+              if (category.regex.test(line)) {
+                console.log(`Match: ${category.label}`);
+                labelsToAdd.push(category.label);
+              }
+            });
           });
 
           if (labelsToAdd.length > 0) {
