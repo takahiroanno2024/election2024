@@ -1,169 +1,198 @@
-import github
-from github import Github
 import os
-import openai
+from typing import List, Dict, Any
 import regex as re
+from github import Github
+from github.Issue import Issue
+from github.Repository import Repository
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
+import openai
 
-token = os.getenv("GITHUB_TOKEN")
-qd_api = os.getenv("QD_API_KEY")
-qd_url = os.getenv("QD_URL")
-g = Github(token)
-repo = g.get_repo(os.getenv("GITHUB_REPOSITORY"))
-issue = repo.get_issue(int(os.getenv("GITHUB_EVENT_ISSUE_NUMBER")))
-issue_content = f"{issue.title}\n{issue.body}"
-try:
-    repo.create_label(name="toxic", color="ff0000")
-    repo.create_label(name="duplicated", color="708090")
-except:
-    pass
+# 定数
+EMBEDDING_MODEL = "text-embedding-3-small"
+COLLECTION_NAME = "issue_collection"
+GPT_MODEL = "gpt-4o"
+MAX_RESULTS = 3
 
-qdrant_client = QdrantClient(
-    url=qd_url, 
-    api_key=qd_api,
-)
-openai_client = openai.Client()
-embedding_model = "text-embedding-3-small"
-collection_name = "issue_collection"
+class Config:
+    def __init__(self):
+        self.github_token = os.getenv("GITHUB_TOKEN")
+        self.qd_api_key = os.getenv("QD_API_KEY")
+        self.qd_url = os.getenv("QD_URL")
+        self.github_repo = os.getenv("GITHUB_REPOSITORY")
+        self.issue_number = int(os.getenv("GITHUB_EVENT_ISSUE_NUMBER"))
 
-def validate_image(text):
-    model_name = "gpt-4o"
-    prompt = "この画像が暴力的、もしくは性的な画像の場合trueと返してください。"
-    image_url = re.search(r"!\[[^\s]+\]\((https://[^\s]+)\)", text)
-    if image_url and len(image_url) > 1:
-        image_url = image_url[1]
-    else:
-        return False
-    try:
-        response = openai_client.chat.completions.create(
-          model=model_name,
-          messages=[
-            {
-              "role": "user",
-              "content": [
-                {"type": "text", "text": prompt},
-                {
-                  "type": "image_url",
-                  "image_url": {
-                    "url": image_url
-                  },
-                },
-              ],
-            }
-          ],
-          max_tokens=1200,
-        )
-    except:
-        return True
-    v = response.choices[0].message.content.lower()
-    if "true" in v:
-        return True
-    else:
-        return False
+class GithubHandler:
+    def __init__(self, config: Config):
+        self.github = Github(config.github_token)
+        self.repo = self.github.get_repo(config.github_repo)
+        self.issue = self.repo.get_issue(config.issue_number)
 
-def judge_violation(text):
-    response = openai_client.moderations.create(input=text)
-    flag = response.results[0].flagged
-    video_flag = validate_image(text)
-    if flag or video_flag:
-        print(response)
-        issue.add_to_labels("toxic")
-        if video_flag:
-            warn = "不適切な画像です。アカウントBANの危険性があります。"
+    def create_labels(self):
+        """ラベルを作成する（既に存在する場合は無視）"""
+        try:
+            self.repo.create_label(name="toxic", color="ff0000")
+            self.repo.create_label(name="duplicated", color="708090")
+        except:
+            pass
+
+    def add_label(self, label: str):
+        """Issueにラベルを追加する"""
+        self.issue.add_to_labels(label)
+
+    def close_issue(self):
+        """Issueをクローズする"""
+        self.issue.edit(state="closed")
+
+    def add_comment(self, comment: str):
+        """Issueにコメントを追加する"""
+        self.issue.create_comment(comment)
+
+class ContentModerator:
+    def __init__(self, openai_client: openai.Client):
+        self.openai_client = openai_client
+
+    def validate_image(self, text: str) -> bool:
+        """画像の内容が不適切かどうかを判断する"""
+        image_url = self._extract_image_url(text)
+        if not image_url:
+            return False
+
+        prompt = "この画像が暴力的、もしくは性的な画像の場合trueと返してください。"
+        try:
+            response = self.openai_client.chat.completions.create(
+                model=GPT_MODEL,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {"type": "image_url", "image_url": {"url": image_url}},
+                        ],
+                    }
+                ],
+                max_tokens=1200,
+            )
+            return "true" in response.choices[0].message.content.lower()
+        except:
+            return True
+
+    def judge_violation(self, text: str) -> bool:
+        """テキストと画像の内容が不適切かどうかを判断する"""
+        response = self.openai_client.moderations.create(input=text)
+        return response.results[0].flagged or self.validate_image(text)
+
+    @staticmethod
+    def _extract_image_url(text: str) -> str:
+        """テキストから画像URLを抽出する"""
+        match = re.search(r"!\[[^\s]+\]\((https://[^\s]+)\)", text)
+        return match[1] if match and len(match) > 1 else ""
+
+class QdrantHandler:
+    def __init__(self, client: QdrantClient, openai_client: openai.Client):
+        self.client = client
+        self.openai_client = openai_client
+
+    def add_issue(self, text: str, issue_number: int):
+        """新しい問題をQdrantに追加する"""
+        embedding = self._create_embedding(text)
+        point = PointStruct(id=issue_number, vector=embedding, payload={"text": text})
+        self.client.upsert(COLLECTION_NAME, [point])
+
+    def search_similar_issues(self, text: str) -> List[Dict[str, Any]]:
+        """類似の問題を検索する"""
+        embedding = self._create_embedding(text)
+        results = self.client.search(collection_name=COLLECTION_NAME, query_vector=embedding)
+        return results[:MAX_RESULTS]
+
+    def _create_embedding(self, text: str) -> List[float]:
+        """テキストのembeddingを作成する"""
+        result = self.openai_client.embeddings.create(input=[text], model=EMBEDDING_MODEL)
+        return result.data[0].embedding
+
+class IssueProcessor:
+    def __init__(self, github_handler: GithubHandler, content_moderator: ContentModerator, qdrant_handler: QdrantHandler, openai_client: openai.Client):
+        self.github_handler = github_handler
+        self.content_moderator = content_moderator
+        self.qdrant_handler = qdrant_handler
+        self.openai_client = openai_client
+
+    def process_issue(self, issue_content: str):
+        """Issueを処理する"""
+        if self.content_moderator.judge_violation(issue_content):
+            self._handle_violation()
+            return
+
+        similar_issues = self.qdrant_handler.search_similar_issues(issue_content)
+        if not similar_issues:
+            self.qdrant_handler.add_issue(issue_content, self.github_handler.issue.number)
+            return
+
+        duplicate_id = self._check_duplication(issue_content, similar_issues)
+        if duplicate_id:
+            self._handle_duplication(duplicate_id)
         else:
-            warn = "不適切な投稿です。アカウントBANの危険性があります。"
-        issue.create_comment(warn)
-        issue.edit(state="closed")
-        return True
-    return flag
+            self.qdrant_handler.add_issue(issue_content, self.github_handler.issue.number)
 
-def add_issue(text:str, iss_num:int):
-    texts = [text]
-    ids = [iss_num]
-    result = openai_client.embeddings.create(input=texts, model=embedding_model)
-    points = [
-        PointStruct(
-            id=idx,
-            vector=data.embedding,
-            payload={"text": t},
+    def _handle_violation(self):
+        """違反を処理する"""
+        self.github_handler.add_label("toxic")
+        self.github_handler.add_comment("不適切な投稿です。アカウントBANの危険性があります。")
+        self.github_handler.close_issue()
+
+    def _check_duplication(self, issue_content: str, similar_issues: List[Dict[str, Any]]) -> int:
+        """重複をチェックする"""
+        prompt = self._create_duplication_check_prompt(issue_content, similar_issues)
+        completion = self.openai_client.chat.completions.create(
+            model=GPT_MODEL,
+            max_tokens=1024,
+            messages=[{"role": "system", "content": prompt}]
         )
-        for idx, data, t in zip(ids, result.data, texts)
-    ]
-    qdrant_client.upsert(collection_name, points)
-    return text
+        review = completion.choices[0].message.content
+        if ":" in review:
+            review = review.split(":")[-1]
+        return int(review) if review.isdecimal() and review != "0" else 0
 
-def merge_issue(iss:int):
-    issue.add_to_labels("duplicated")
-    print(f"merge to {iss}")
-    issue.create_comment(f"#{iss} と重複しているかもしれません")
-    return iss
+    def _handle_duplication(self, duplicate_id: int):
+        """重複を処理する"""
+        self.github_handler.add_label("duplicated")
+        self.github_handler.add_comment(f"#{duplicate_id} と重複しているかもしれません")
 
-def qd_search(text:str):
-    results = qdrant_client.search(
-        collection_name=collection_name,
-        query_vector=openai_client.embeddings.create(
-            input=[text],
-            model=embedding_model,
-        )
-        .data[0]
-        .embedding,
-    )
-    return results
+    @staticmethod
+    def _create_duplication_check_prompt(issue_content: str, similar_issues: List[Dict[str, Any]]) -> str:
+        """重複チェック用のプロンプトを作成する"""
+        similar_issues_text = "\n".join([f'id:{issue["id"]}\n内容:{issue["payload"]["text"]}' for issue in similar_issues])
+        return f"""
+        以下は市民から寄せられた政策提案です。
+        {issue_content}
+        この投稿を読み、以下の過去提案の中に重複する提案があるかを判断してください。
+        {similar_issues_text}
+        重複する提案があればそのidを出力してください。
+        もし存在しない場合は0と出力してください。
 
-def qd_add(text:str, iss_num:int):
-    texts = [text]
-    ids = [iss_num]
-    result = openai_client.embeddings.create(input=texts, model=embedding_model)
-    points = [
-    PointStruct(
-        id=idx,
-        vector=data.embedding,
-        payload={"text": text},
-    )
-    for idx, data, text in zip(ids, result.data, texts)
-    ]
-    qdrant_client.upsert(collection_name, points)
+        [出力形式]
+        id:0
+        """
 
-if judge_violation(issue_content):
-    quit()
-results = qd_search(issue_content)
+def setup():
+    """セットアップを行い、必要なオブジェクトを返す"""
+    config = Config()
+    github_handler = GithubHandler(config)
+    github_handler.create_labels()
 
-if len(results) > 2:
-    results = results[:3]
-else:
-    results = results
-print(results)
-res = ""
-for i in results:
-    res+=f'id:{i.id}\n内容:{i.payload["text"]}\n'
-res = res.strip()
+    openai_client = openai.Client()
+    content_moderator = ContentModerator(openai_client)
 
-prompt= f"""
-以下は市民から寄せられた政策提案です。
-{issue_content}
-この投稿を読み、以下の過去提案の中に重複する提案があるかを判断してください。
-{res}
-重複する提案があればそのidを出力してください。
-もし存在しない場合は0と出力してください。
+    qdrant_client = QdrantClient(url=config.qd_url, api_key=config.qd_api_key)
+    qdrant_handler = QdrantHandler(qdrant_client, openai_client)
 
-[出力形式]
-id:0
-"""
-print(prompt)
-completion = openai_client.chat.completions.create(
-  model="gpt-4o",
-  max_tokens= 1024,
-  messages=[
-  {"role": "system", "content": prompt},
-  ]
-)
-review = completion.choices[0].message.content
-if ":" in review:
-    review = review.split(":")[-1]
-if review.isdecimal():
-    if review == "0":
-        add_issue(issue_content, issue.number)
-    else:
-        merge_issue(int(review))
-print(review)
+    return github_handler, content_moderator, qdrant_handler, openai_client
+
+def main():
+    github_handler, content_moderator, qdrant_handler, openai_client = setup()
+    issue_processor = IssueProcessor(github_handler, content_moderator, qdrant_handler, openai_client)
+    issue_content = f"{github_handler.issue.title}\n{github_handler.issue.body}"
+    issue_processor.process_issue(issue_content)
+
+if __name__ == "__main__":
+    main()
