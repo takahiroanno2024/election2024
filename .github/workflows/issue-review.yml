@@ -31,4 +31,4 @@ jobs:
         QD_API_KEY: ${{ secrets.QD_API_KEY }}
         QD_URL: ${{ secrets.QD_URL }}
       run: |
-        python review_issue.py
+        python .github/scripts/review_issue.py
