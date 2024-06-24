@@ -21,11 +21,34 @@ MAX_RESULTS = 3
 
 class Config:
     def __init__(self):
+        print("設定の初期化を開始します...")
         self.github_token = os.getenv("GITHUB_TOKEN")
+        if self.github_token is None:
+            print("GITHUB_TOKENが見つかりません。GH_TOKENを使用してみます...")
+            self.github_token = os.getenv("GH_TOKEN")
+            if self.github_token is None:
+                print("GH_TOKENも見つかりません。GitHubトークンが利用できません。")
+            else:
+                print("GH_TOKENからトークンを正常に取得しました。")
+        else:
+            print("GITHUB_TOKENからトークンを正常に取得しました。")
+        
         self.qd_api_key = os.getenv("QD_API_KEY")
+        print("QD_API_KEYの状態:", "取得済み" if self.qd_api_key else "見つかりません")
+        
         self.qd_url = os.getenv("QD_URL")
+        print("QD_URLの状態:", "取得済み" if self.qd_url else "見つかりません")
+        
         self.github_repo = os.getenv("GITHUB_REPOSITORY")
-        self.issue_number = int(os.getenv("GITHUB_EVENT_ISSUE_NUMBER"))
+        print("GITHUB_REPOSITORYの状態:", "取得済み" if self.github_repo else "見つかりません")
+        
+        self.issue_number = os.getenv("GITHUB_EVENT_ISSUE_NUMBER")
+        if self.issue_number:
+            self.issue_number = int(self.issue_number)
+            print(f"GITHUB_EVENT_ISSUE_NUMBER: {self.issue_number}")
+        else:
+            print("GITHUB_EVENT_ISSUE_NUMBERが見つかりません")
+        print("設定の初期化が完了しました。")
 
 class GithubHandler:
     def __init__(self, config: Config):
@@ -166,7 +189,7 @@ class IssueProcessor:
     @staticmethod
     def _create_duplication_check_prompt(issue_content: str, similar_issues: List[Dict[str, Any]]) -> str:
         """重複チェック用のプロンプトを作成する"""
-        similar_issues_text = "\n".join([f'id:{issue["id"]}\n内容:{issue["payload"]["text"]}' for issue in similar_issues])
+        similar_issues_text = "\n".join([f'id:{issue.id}\n内容:{issue.payload["text"]}' for issue in similar_issues])
         return f"""
         以下は市民から寄せられた政策提案です。
         {issue_content}
