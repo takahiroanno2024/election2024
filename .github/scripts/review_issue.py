@@ -8,6 +8,11 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
 import openai
 
+# GitHub Actions環境で実行されていない場合のみ.envファイルを読み込む
+if not os.getenv('GITHUB_ACTIONS'):
+    from dotenv import load_dotenv
+    load_dotenv()
+
 # 定数
 EMBEDDING_MODEL = "text-embedding-3-small"
 COLLECTION_NAME = "issue_collection"

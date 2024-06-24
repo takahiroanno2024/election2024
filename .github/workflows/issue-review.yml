@@ -3,9 +3,11 @@ name: Issue Review
 on:
   issues:
     types: [opened]
+
 permissions:
   issues: write
   contents: read
+
 jobs:
   review_issue:
     runs-on: ubuntu-latest
@@ -30,5 +32,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         QD_API_KEY: ${{ secrets.QD_API_KEY }}
         QD_URL: ${{ secrets.QD_URL }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
       run: |
-        python review_issue.py
+        python .github/scripts/review_issue.py
