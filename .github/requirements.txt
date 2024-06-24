@@ -1,4 +1,4 @@
-openai
-PyGithub
-qdrant-client
-regex
+openai==1.35.3
+PyGithub==2.3.0
+qdrant-client==1.9.2
+regex==2024.5.15
