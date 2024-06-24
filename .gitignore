@@ -1,3 +1,5 @@
 gvenv
 .venv/*
 site
+
+.env
