@@ -5,13 +5,14 @@ body:
     attributes:
       label: 政策ビジョン
       description: 該当する政策カテゴリを一つ選んでください
-      multiple: false
+      multiple: true
       options:
         - 経済
         - 医療・防災
         - 教育・子育て
         - 行政
         - 民主主義
+        - その他
     validations:
       required: true
   - type: textarea
@@ -39,7 +40,7 @@ body:
     attributes:
       label: 調べたこと（裏付けとなる事実・ファクト）
     validations:
-      required: true
+      required: false
   - type: textarea
     attributes:
       label: 自由記述欄
