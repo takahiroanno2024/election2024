@@ -24,12 +24,7 @@ class Config:
         print("設定の初期化を開始します...")
         self.github_token = os.getenv("GITHUB_TOKEN")
         if self.github_token is None:
-            print("GITHUB_TOKENが見つかりません。GH_TOKENを使用してみます...")
-            self.github_token = os.getenv("GH_TOKEN")
-            if self.github_token is None:
-                print("GH_TOKENも見つかりません。GitHubトークンが利用できません。")
-            else:
-                print("GH_TOKENからトークンを正常に取得しました。")
+            print("GITHUB_TOKENが見つかりません ...")
         else:
             print("GITHUB_TOKENからトークンを正常に取得しました。")
         
