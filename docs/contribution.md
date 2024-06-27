@@ -30,6 +30,7 @@ GitHubとは、ソフトウェアエンジニア・ITエンジニアがみんな
     - 将来において、より適切な手段が模索されるべきものだと考えています。
 - GitHubはちょっと難しいな、と感じた方も、このプロジェクトを広めていただくだけで、あるいは見ていただくだけでも、本プロジェクトの参加者であると考えています。
     - [X(Twitter)で `#TOKYOAI` のハッシュタグをつけて投稿](https://twitter.com/intent/tweet?url=https%3A%2F%2Fmanifest.takahiroanno.com%2F&text=%23TOKYOAI%20%23%E5%AE%89%E9%87%8E%E3%81%9F%E3%81%8B%E3%81%B2%E3%82%8D) していただければ、すべて目を通させていただきます。
+    - マニフェストについてのご意見は[Google Formでも受け付けています](https://docs.google.com/forms/d/e/1FAIpQLSfiSmvhVjzW_POtep_8J53n1QRR3zc2QBtyqPPMQxfnzjmRyA/viewform)。
 
 ## 本プロジェクトへの貢献の方法
 
