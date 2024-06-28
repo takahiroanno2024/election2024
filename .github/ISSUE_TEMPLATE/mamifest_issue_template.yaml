@@ -1,0 +1,48 @@
+name: マニフェスト提言
+description: マニフェスト提言用のテンプレート
+body:
+  - type: dropdown
+    attributes:
+      label: 政策ビジョン
+      description: 該当する政策カテゴリを一つ選んでください
+      multiple: true
+      options:
+        - 経済
+        - 医療・防災
+        - 教育・子育て
+        - 行政
+        - 民主主義
+        - その他
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 政策
+      description: できる限りの記入をお願いします
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 必要だと思ったきっかけ
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: なぜ必要か
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: この Issue で議論したいこと
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 調べたこと（裏付けとなる事実・ファクト）
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 自由記述欄
+    validations:
+      required: false
