@@ -9,6 +9,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     steps:
       - uses: actions/checkout@v4
       - name: Configure Git Credentials
