@@ -1,3 +1,6 @@
+
+![ローカル開発環境構築ガイド](https://github.com/Sunwood-ai-labs/election2024/assets/108736814/04610ae4-805e-474a-a656-c4153136e644)
+
 # 安野たかひろ：都知事選マニフェスト ローカル開発環境構築ガイド
 
 ## 1. はじめに
@@ -53,20 +56,9 @@ git clone https://github.com/yourusername/election2024.git
 cd election2024
 ```
 
-注意：`yourusername`は実際のGitHubユーザー名に置き換えてください。
+>[!NOTE] 
+>`yourusername`は実際のGitHubユーザー名に置き換えてください。
 
-元のリポジトリとの同期を維持するために、上流リポジトリを追加します：
-
-```
-git remote add upstream https://github.com/original-owner/election2024.git
-```
-
-これにより、元のリポジトリの変更を簡単に取り込むことができます：
-
-```
-git fetch upstream
-git merge upstream/main
-```
 
 フォークしたリポジトリで作業を進め、準備ができたら元のリポジトリにプルリクエストを作成して貢献することができます。
 
@@ -80,7 +72,8 @@ git merge upstream/main
    git clone https://github.com/yourusername/election2024.git
    ```
 
-   注意：`yourusername`の部分は、実際のGitHubユーザー名またはプロジェクトの所有者名に置き換えてください。
+>[!NOTE] 
+>`yourusername`の部分は、実際のGitHubユーザー名またはプロジェクトの所有者名に置き換えてください。
 
 3. クローンしたディレクトリに移動します：
 
@@ -100,7 +93,8 @@ git merge upstream/main
    cd .github/scripts/
    ```
 
-   注意：以降の操作は、すべてこの`.github/scripts/`ディレクトリ内で行います。
+>[!NOTE] 
+>以降の操作は、すべてこの`.github/scripts/`ディレクトリ内で行います。
 
 ### 4.2 環境変数の設定
 
@@ -123,7 +117,9 @@ git merge upstream/main
    - `GITHUB_REPOSITORY`: あなたのGitHubリポジトリ（例：`username/repo`）
    - `GITHUB_TOKEN`: GitHubの個人アクセストークン
 
-   注意：これらの値は、各サービスの管理画面やドキュメントを参照して取得してください。個人情報やAPIキーは絶対に公開しないようご注意ください。
+>[!NOTE] 
+>これらの値は、各サービスの管理画面やドキュメントを参照して取得してください。個人情報やAPIキーは絶対に公開しないようご注意ください。
+
 
 ### 4.3 Qdrantについて
 
@@ -149,7 +145,42 @@ Qdrantは、このプロジェクトで使用されているベクトルデー�
 
 5. これらの値を`.env`ファイルの対応する箇所に設定します。
 
-注意：APIキーは秘密情報です。GitHub等の公開リポジトリにアップロードしたり、他人と共有したりしないでください。
+>[!NOTE] 
+>APIキーは秘密情報です。GitHub等の公開リポジトリにアップロードしたり、他人と共有したりしないでください。
+
+### 4.4 Qdrantの初期化
+
+Qdrantを使用する前に、適切なコレクションを作成し初期化する必要があります。以下の手順に従ってQdrantを初期化してください。
+
+1. `.github/developer/`ディレクトリに移動します：
+
+   ```
+   cd .github/developer/
+   ```
+
+2. `initialize_qdrant_collection.py`スクリプトを実行します：
+
+   ```
+   python initialize_qdrant_collection.py
+   ```
+
+   このスクリプトは以下の操作を行います：
+   - Qdrantサーバーへの接続
+   - 既存のコレクションの一覧表示
+   - "issue_collection"という名前の新しいコレクションの作成（既に存在しない場合）
+   - 作成されたコレクションの詳細情報の取得
+
+3. スクリプトの出力を確認し、以下の点に注意してください：
+   - APIキーが正しく読み込まれているか（最初と最後の5文字が表示されます）
+   - Qdrantサーバーに正常に接続できているか
+   - "issue_collection"が正常に作成されたか、または既に存在しているか
+   - エラーメッセージが表示された場合は、エラーの内容を確認し対処してください
+
+>[!NOTE] 
+>`このスクリプトはプロジェクトの`.env`ファイルから環境変数を読み込みます。`.env`ファイルが正しく設定されていることを確認してください。
+
+初期化が成功すると、Qdrantコレクションが利用可能になり、プロジェクトで使用できるようになります。
+
 
 ## 5. 依存ライブラリのインストール
 
@@ -214,7 +245,8 @@ GitHubのAPI使用回数制限に達した場合：
 
 5. スクリプトの実行後、GitHubのIssueページを確認し、正しく処理されたか確認します。
 
-注意：テスト用のIssueを作成する際は、実際の運用環境に影響を与えないよう注意してください。
+>[!NOTE] 
+>テスト用のIssueを作成する際は、実際の運用環境に影響を与えないよう注意してください。
 
 ## 9. まとめ
 
