@@ -29,6 +29,7 @@
 3. [未来世代：世界一の子育て・教育環境](./manifest/education.md)
 4. [行政運営：行政をもっと簡単、透明に](./manifest/administration.md)
 5. [民主主義：高速な民意反映](./manifest/democracy.md)
+6. [その他政策や頂いたご質問に対するご回答](./manifest/others.md)
 
 ### 初めての方へ
 
