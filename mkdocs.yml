@@ -11,6 +11,8 @@ nav:
     - '3. 教育・子育て': 'manifest/education.md'
     - '4. 行政': 'manifest/administration.md'
     - '5. 民主主義': 'manifest/democracy.md'
+    - '6. 予算・財源': 'manifest/budget.md'
+    - '7. その他': 'manifest/others.md'
   - '貢献したいあなたへ': 'contribution.md'
   - 'Issueマニュアル': 'manual_issue.md'
   - 'Pull Requestマニュアル': 'manual_pull_request.md'
