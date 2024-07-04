@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     collection_name: str = "issue_collection"
     gpt_model: str = "gpt-4"
     max_results: int = 3
-    openai_api_key: str  # 新しく追加
+    openai_api_key: str
 
     class Config:
         env_file = ".env"
