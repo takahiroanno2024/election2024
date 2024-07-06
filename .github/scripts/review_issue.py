@@ -75,7 +75,7 @@ class ContentModerator:
     def __init__(self, openai_client: openai.Client):
         self.openai_client = openai_client
 
-    def validate_image(self, text: str) -> bool:
+    def is_inappropriate_image(self, text: str) -> bool:
         """画像の内容が不適切かどうかを判断する"""
         image_url = self._extract_image_url(text)
         if not image_url:
@@ -100,10 +100,10 @@ class ContentModerator:
         except:
             return True
 
-    def judge_violation(self, text: str) -> bool:
+    def is_inappropriate_issue(self, text: str) -> bool:
         """テキストと画像の内容が不適切かどうかを判断する"""
         response = self.openai_client.moderations.create(input=text)
-        return response.results[0].flagged or self.validate_image(text)
+        return response.results[0].flagged or self.is_inappropriate_image(text)
 
     @staticmethod
     def _extract_image_url(text: str) -> str:
@@ -142,7 +142,7 @@ class IssueProcessor:
 
     def process_issue(self, issue_content: str):
         """Issueを処理する"""
-        if self.content_moderator.judge_violation(issue_content):
+        if self.content_moderator.is_inappropriate_issue(issue_content):
             self._handle_violation()
             return
 
