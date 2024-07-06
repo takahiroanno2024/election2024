@@ -100,7 +100,7 @@ class ContentModerator:
         except:
             return True
 
-    def is_inappropriate(self, text: str) -> bool:
+    def is_inappropriate_issue(self, text: str) -> bool:
         """テキストと画像の内容が不適切かどうかを判断する"""
         response = self.openai_client.moderations.create(input=text)
         return response.results[0].flagged or self.is_inappropriate_image(text)
@@ -142,7 +142,7 @@ class IssueProcessor:
 
     def process_issue(self, issue_content: str):
         """Issueを処理する"""
-        if self.content_moderator.is_inappropriate(issue_content):
+        if self.content_moderator.is_inappropriate_issue(issue_content):
             self._handle_violation()
             return
 
