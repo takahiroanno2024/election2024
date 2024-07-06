@@ -5,4 +5,3 @@ regex==2024.5.15
 python-dotenv==1.0.1
 loguru==0.7.2
 pydantic-settings==2.2.1
-python-dotenv==1.0.1
